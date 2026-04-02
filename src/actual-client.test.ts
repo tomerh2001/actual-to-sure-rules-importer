@@ -90,10 +90,10 @@ void test('ActualClient.connect downloads and loads the requested budget before 
 
 	assert.deepEqual(callLog, [
 		'init',
-		'getServerVersion',
 		'downloadBudget:sync-id',
 		'getBudgets',
 		'loadBudget:budget-file-id',
+		'getServerVersion',
 		'getRules',
 		'getAccounts',
 		'getCategories',

@@ -66,22 +66,18 @@ export class ActualClient {
 	async connect() {
 		this.dependencies.stdout.mute();
 		await this.dependencies.api.init(this.config.init);
-		const serverVersion = await this.assertVersionCompatibility();
 
 		try {
 			await this.dependencies.api.downloadBudget(this.config.budget.syncId, this.config.budget);
 			const budgets = await this.dependencies.api.getBudgets();
 			const budgetId = resolveBudgetId(budgets, this.config.budget.syncId);
 			await this.dependencies.api.loadBudget(budgetId);
+			await this.assertVersionCompatibility();
 		} catch (error) {
 			if (error instanceof Error && error.message.includes('out-of-sync-migrations')) {
-				const serverVersionNote = hasVersion(serverVersion)
-					? ` Server reports ${serverVersion.version}; importer bundles @actual-app/api ${bundledActualApiVersion}.`
-					: '';
 				throw new Error([
 					'Actual failed with "out-of-sync-migrations".',
 					'This usually means the Actual server version and the importer bundle do not match.',
-					serverVersionNote.trim(),
 				].filter(Boolean).join(' '));
 			}
 
