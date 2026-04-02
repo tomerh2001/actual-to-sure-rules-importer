@@ -166,7 +166,7 @@ void test('buildRuleImportCsv escapes JSON payload cells', () => {
 	const expectedBody = [
 		'Actual Rule test,transaction,true,2026-04-03,',
 		'"[{""condition_type"":""transaction_name"",""operator"":""like"",""value"":""amazon""}]",',
-		String.raw`"[{""action_type"":""set_transaction_name"",""value"":""Amazon \""Prime\""""}]"`,
+		String.raw`"[{""action_type"":""set_transaction_name"",""value"":""Amazon \u0022Prime\u0022""}]"`,
 	].join('');
 	const expected = [
 		'name,resource_type,active,effective_date,conditions,actions',

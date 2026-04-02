@@ -24,8 +24,8 @@ export function buildRuleImportCsv(rows: SureRuleImportRow[]) {
 			row.resource_type,
 			String(row.active),
 			row.effective_date,
-			JSON.stringify(row.conditions),
-			JSON.stringify(row.actions),
+			stringifyJsonCell(row.conditions),
+			stringifyJsonCell(row.actions),
 		]),
 	];
 
@@ -77,4 +77,8 @@ function escapeCsvCell(value: string) {
 	}
 
 	return `"${value.replaceAll('"', '""')}"`;
+}
+
+function stringifyJsonCell(value: unknown) {
+	return JSON.stringify(value).replaceAll(String.raw`\"`, String.raw`\u0022`);
 }
