@@ -14,7 +14,9 @@
         "@semantic-release/git",
         "@semantic-release/github",
         ["@codedependant/semantic-release-docker", {
-            "dockerImage": "ghcr.io/tomerh2001/actual-to-sure-rules-importer"
+            "dockerImage": "actual-to-sure-rules-importer",
+            "dockerProject": "tomerh2001",
+            "dockerRegistry": "ghcr.io"
         }]
     ]
 }
