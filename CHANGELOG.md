@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/tomerh2001/actual-to-sure-rules-importer/compare/v1.0.2...v1.0.3) (2026-04-02)
+
+
+### Bug Fixes
+
+* keep rule import json valid for quoted values ([2e43b78](https://github.com/tomerh2001/actual-to-sure-rules-importer/commit/2e43b786b1c397d41eb5d576639f1b72061a038f))
+
 ## [1.0.2](https://github.com/tomerh2001/actual-to-sure-rules-importer/compare/v1.0.1...v1.0.2) (2026-04-02)
 
 
