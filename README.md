@@ -65,7 +65,7 @@ Skipped rules are listed in the JSON report with reasons.
 ```yaml
 services:
   actual-to-sure-rules-importer:
-    image: tomerh2001/actual-to-sure-rules-importer:latest
+    image: ghcr.io/tomerh2001/actual-to-sure-rules-importer:latest
     restart: always
     environment:
       - TZ=Asia/Jerusalem
