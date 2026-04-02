@@ -226,4 +226,5 @@ yarn test
 ## Runtime Notes
 
 - The importer checks the Actual server version before downloading the budget and fails early if the bundled `@actual-app/api` version does not match.
+- After downloading the Actual budget, the importer resolves the downloaded local budget file and explicitly opens it before reading rules, accounts, categories, or payees.
 - The Sure upload path uses `RuleImport` through `api/v1/imports`, then polls the import status until it reaches `complete` or `failed`.

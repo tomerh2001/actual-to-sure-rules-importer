@@ -13,15 +13,31 @@ type ServerVersionResponse = {
 	version: string;
 };
 
+type ActualBudgetFile = {
+	cloudFileId?: string;
+	groupId?: string;
+	id?: string;
+};
+
 type ActualApi = {
 	downloadBudget(syncId: string, budgetConfig: {password?: string; syncId: string}): Promise<void>;
+	getBudgets(): Promise<ActualBudgetFile[]>;
 	getAccounts(): Promise<ActualAccount[]>;
 	getCategories(): Promise<ActualCategory[]>;
 	getPayees(): Promise<ActualPayee[]>;
 	getRules(): Promise<ActualRule[]>;
 	getServerVersion(): Promise<Record<string, unknown> | ServerVersionResponse>;
 	init(config: ConfigActual['init']): Promise<void>;
+	loadBudget(budgetId: string): Promise<void>;
 	shutdown(): Promise<void>;
+};
+
+type ActualClientDependencies = {
+	api: ActualApi;
+	stdout: {
+		mute: () => void;
+		unmute: () => void;
+	};
 };
 
 const require = createRequire(import.meta.url);
@@ -36,16 +52,27 @@ const mutedStdout = stdout as {
 };
 const bundledActualApiVersion = packageJson.dependencies?.['@actual-app/api'] ?? 'unknown';
 
+const defaultDependencies: ActualClientDependencies = {
+	api: actualApi,
+	stdout: mutedStdout,
+};
+
 export class ActualClient {
-	constructor(private readonly config: ConfigActual) {}
+	constructor(
+		private readonly config: ConfigActual,
+		private readonly dependencies: ActualClientDependencies = defaultDependencies,
+	) {}
 
 	async connect() {
-		mutedStdout.mute();
-		await actualApi.init(this.config.init);
+		this.dependencies.stdout.mute();
+		await this.dependencies.api.init(this.config.init);
 		const serverVersion = await this.assertVersionCompatibility();
 
 		try {
-			await actualApi.downloadBudget(this.config.budget.syncId, this.config.budget);
+			await this.dependencies.api.downloadBudget(this.config.budget.syncId, this.config.budget);
+			const budgets = await this.dependencies.api.getBudgets();
+			const budgetId = resolveBudgetId(budgets, this.config.budget.syncId);
+			await this.dependencies.api.loadBudget(budgetId);
 		} catch (error) {
 			if (error instanceof Error && error.message.includes('out-of-sync-migrations')) {
 				const serverVersionNote = hasVersion(serverVersion)
@@ -60,25 +87,25 @@ export class ActualClient {
 
 			throw error;
 		} finally {
-			mutedStdout.unmute();
+			this.dependencies.stdout.unmute();
 		}
 	}
 
 	async disconnect() {
-		mutedStdout.mute();
+		this.dependencies.stdout.mute();
 		try {
-			await actualApi.shutdown();
+			await this.dependencies.api.shutdown();
 		} finally {
-			mutedStdout.unmute();
+			this.dependencies.stdout.unmute();
 		}
 	}
 
 	async loadSnapshot() {
 		const [rules, accounts, categories, payees] = await Promise.all([
-			actualApi.getRules(),
-			actualApi.getAccounts(),
-			actualApi.getCategories(),
-			actualApi.getPayees(),
+			this.dependencies.api.getRules(),
+			this.dependencies.api.getAccounts(),
+			this.dependencies.api.getCategories(),
+			this.dependencies.api.getPayees(),
 		]);
 
 		return {
@@ -90,7 +117,7 @@ export class ActualClient {
 	}
 
 	private async assertVersionCompatibility() {
-		const serverVersion = await actualApi.getServerVersion();
+		const serverVersion = await this.dependencies.api.getServerVersion();
 		if (!hasVersion(serverVersion)) {
 			return serverVersion;
 		}
@@ -110,4 +137,21 @@ export class ActualClient {
 
 function hasVersion(value: Record<string, unknown> | ServerVersionResponse): value is ServerVersionResponse {
 	return typeof value === 'object' && value !== null && typeof value.version === 'string';
+}
+
+export function resolveBudgetId(budgets: ActualBudgetFile[], syncId: string) {
+	const matchingBudget = budgets.find(budget =>
+		budget.groupId === syncId
+		|| budget.cloudFileId === syncId
+		|| budget.id === syncId);
+
+	if (matchingBudget?.id) {
+		return matchingBudget.id;
+	}
+
+	if (budgets.length === 1 && budgets[0]?.id) {
+		return budgets[0].id;
+	}
+
+	throw new Error(`Unable to resolve Actual budget for sync ID ${syncId}.`);
 }
