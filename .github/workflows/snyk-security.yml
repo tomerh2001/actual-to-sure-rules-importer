@@ -1,0 +1,65 @@
+name: Snyk Security
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Check Snyk configuration
+        id: snyk-gate
+        run: |
+          if [ -n "$SNYK_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Enable Corepack
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        run: corepack enable
+
+      - name: Install Dependencies
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        run: yarn install --immutable
+
+      - name: Set up Snyk CLI
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        uses: snyk/actions/setup@cdb760004ba9ea4d525f2e043745dfe85bb9077e
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Scan dependencies
+        if: ${{ steps.snyk-gate.outputs.enabled == 'true' }}
+        run: snyk test --all-projects
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Explain skip
+        if: ${{ steps.snyk-gate.outputs.enabled != 'true' }}
+        run: echo "Skipping Snyk scan because SNYK_TOKEN is not configured for this repository."

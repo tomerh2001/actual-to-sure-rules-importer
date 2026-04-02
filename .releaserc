@@ -1,0 +1,20 @@
+{
+    "branches": [
+        "main",
+        {
+            "name": "develop",
+            "prerelease": "beta",
+            "channel": "beta"
+        }
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        "@semantic-release/changelog",
+        "@semantic-release/git",
+        "@semantic-release/github",
+        ["@codedependant/semantic-release-docker", {
+            "dockerImage": "tomerh2001/actual-to-sure-rules-importer"
+        }]
+    ]
+}

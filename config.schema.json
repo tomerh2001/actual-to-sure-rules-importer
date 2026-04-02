@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Config",
+  "definitions": {
+    "ActualInitConfig": {
+      "type": "object",
+      "properties": {
+        "dataDir": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "serverURL": {
+          "type": "string"
+        },
+        "sessionToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataDir",
+        "serverURL"
+      ],
+      "additionalProperties": true
+    },
+    "ActualBudgetConfig": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "syncId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "syncId"
+      ],
+      "additionalProperties": false
+    },
+    "ActualConfig": {
+      "type": "object",
+      "properties": {
+        "init": {
+          "$ref": "#/definitions/ActualInitConfig"
+        },
+        "budget": {
+          "$ref": "#/definitions/ActualBudgetConfig"
+        }
+      },
+      "required": [
+        "init",
+        "budget"
+      ],
+      "additionalProperties": false
+    },
+    "SureConfig": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "baseUrl": {
+          "type": "string"
+        },
+        "publishTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1000
+        }
+      },
+      "required": [
+        "apiKey",
+        "baseUrl"
+      ],
+      "additionalProperties": false
+    },
+    "ImportConfig": {
+      "type": "object",
+      "properties": {
+        "dryRun": {
+          "type": "boolean"
+        },
+        "effectiveDate": {
+          "type": "string"
+        },
+        "importedPayeeConditionTarget": {
+          "type": "string",
+          "enum": [
+            "transaction_details",
+            "transaction_name"
+          ]
+        },
+        "maxRuleVariants": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "namePrefix": {
+          "type": "string"
+        },
+        "outputDir": {
+          "type": "string"
+        },
+        "partialRules": {
+          "type": "boolean"
+        },
+        "payeeActionTarget": {
+          "type": "string",
+          "enum": [
+            "set_transaction_merchant",
+            "set_transaction_name"
+          ]
+        },
+        "payeeConditionTarget": {
+          "type": "string",
+          "enum": [
+            "transaction_merchant",
+            "transaction_name"
+          ]
+        },
+        "publish": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SureAccountReference": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sureAccountId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sureAccountId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "sureAccountName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sureAccountName"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "MappingsConfig": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/SureAccountReference"
+          }
+        },
+        "categories": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "payees": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Config": {
+      "type": "object",
+      "properties": {
+        "actual": {
+          "$ref": "#/definitions/ActualConfig"
+        },
+        "import": {
+          "$ref": "#/definitions/ImportConfig"
+        },
+        "mappings": {
+          "$ref": "#/definitions/MappingsConfig"
+        },
+        "sure": {
+          "$ref": "#/definitions/SureConfig"
+        }
+      },
+      "required": [
+        "actual",
+        "sure"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

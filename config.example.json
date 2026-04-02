@@ -1,0 +1,46 @@
+{
+  "actual": {
+    "init": {
+      "dataDir": "./data",
+      "serverURL": "https://actual.example.com",
+      "password": "actual-server-password"
+    },
+    "budget": {
+      "syncId": "your-budget-sync-id",
+      "password": "your-budget-password"
+    }
+  },
+  "sure": {
+    "baseUrl": "https://sure.example.com",
+    "apiKey": "sure-api-key"
+  },
+  "import": {
+    "namePrefix": "Actual Rule",
+    "effectiveDate": "2026-04-03",
+    "outputDir": "./output",
+    "publish": true,
+    "partialRules": false,
+    "payeeConditionTarget": "transaction_name",
+    "payeeActionTarget": "set_transaction_name",
+    "importedPayeeConditionTarget": "transaction_name",
+    "maxRuleVariants": 16
+  },
+  "mappings": {
+    "accounts": {
+      "actual-account-id": {
+        "sureAccountId": "sure-account-id"
+      },
+      "Checking": {
+        "sureAccountName": "Bank Hapoalim"
+      }
+    },
+    "categories": {
+      "actual-category-id": "Groceries",
+      "Fuel": "Car Fuel"
+    },
+    "payees": {
+      "actual-payee-id": "Amazon",
+      "AMEX CARD": "American Express"
+    }
+  }
+}

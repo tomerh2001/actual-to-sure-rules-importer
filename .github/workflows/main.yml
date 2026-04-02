@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+
+      - name: Run Test Suite
+        run: yarn test
+
+  release:
+    if: ${{ github.event_name == 'push' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+    steps:
+      - name: Check release configuration
+        id: release-gate
+        run: |
+          missing=()
+          [[ -n "$DOCKER_REGISTRY_USER" ]] || missing+=("DOCKER_REGISTRY_USER")
+          [[ -n "$DOCKER_REGISTRY_PASSWORD" ]] || missing+=("DOCKER_REGISTRY_PASSWORD")
+
+          if [ "${#missing[@]}" -eq 0 ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "missing=none" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "missing=${missing[*]}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Enable Corepack
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        run: corepack enable
+
+      - name: Install Dependencies
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        run: yarn install --immutable
+
+      - name: Make repo writable for BuildKit
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        run: sudo chmod -R 777 "$GITHUB_WORKSPACE/.yarn"
+
+      - name: Semantic Release
+        if: ${{ steps.release-gate.outputs.enabled == 'true' }}
+        run: yarn semantic-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.server_url }}/${{ github.repository }}
+          DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+      - name: Explain skip
+        if: ${{ steps.release-gate.outputs.enabled != 'true' }}
+        run: |
+          echo "Skipping semantic release because one or more release secrets are not configured."
+          echo "Missing: ${{ steps.release-gate.outputs.missing }}"

@@ -1,0 +1,10 @@
+services:
+  importer:
+    image: tomerh2001/actual-to-sure-rules-importer:latest
+    restart: always
+    environment:
+      - TZ=Asia/Jerusalem
+      - SCHEDULE=0 */6 * * *
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./output:/app/output
