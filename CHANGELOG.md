@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/tomerh2001/actual-to-sure-rules-importer/compare/v1.0.0...v1.0.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* load downloaded actual budget before reading rules ([2d8cb90](https://github.com/tomerh2001/actual-to-sure-rules-importer/commit/2d8cb908363a8640bd9f8004d9f694d199ab12ee))
+
 # 1.0.0 (2026-04-02)
 
 
