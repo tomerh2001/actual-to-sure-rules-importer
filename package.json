@@ -29,7 +29,7 @@
   },
   "packageManager": "yarn@4.14.1",
   "dependencies": {
-    "@actual-app/api": "26.3.0",
+    "@actual-app/api": "26.5.0",
     "cronstrue": "^3.9.0",
     "moment": "^2.30.1",
     "mute-stdout": "^2.0.0",
