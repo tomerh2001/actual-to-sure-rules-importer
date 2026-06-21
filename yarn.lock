@@ -5530,9 +5530,9 @@ __metadata:
   linkType: hard
 
 "node-cron@npm:^4.2.1":
-  version: 4.3.0
-  resolution: "node-cron@npm:4.3.0"
-  checksum: 10c0/91a2821b943b8d6aea2fa48ec7d07cc5616f0c79d025dafeb03aea8ae51865d04f1a70cd3eb5cc866646bbaee9483bf36706addf41675683264d119c59da67ee
+  version: 4.4.1
+  resolution: "node-cron@npm:4.4.1"
+  checksum: 10c0/a4b2354e04076860c2d47d4015d421fc795eaa7d566a1f8e1fb576d20edc5e0e193adb27a9714a67d1ed146e4782947e8e12ba1fce4a2ee2697ec39a11bb4ea6
   languageName: node
   linkType: hard
 
